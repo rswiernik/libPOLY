@@ -5,13 +5,21 @@
 
 typedef enum
 {
-	sine,
-	square,
-	saw,
-	triangle,
-	sample,
-	loopsample
+	poly_sine,
+	poly_square,
+	poly_saw,
+	poly_triangle,
+	poly_noise,
+	poly_onesample,
+	poly_loopsample
 } poly_wavetype;
+
+typedef struct
+{
+	float *data;
+	unsigned int len;
+	unsigned int div;
+} poly_sample;
 
 typedef struct
 {
@@ -23,10 +31,18 @@ typedef struct
 	float freq;
 	float phase;
 	float duty;
-	int sample_bitdepth;
-	int sample_length;
-	char *sample;
+	poly_sample *sample;
+	unsigned int noise_counter;
+	unsigned int noise_state;
+	unsigned int noise_size;
+	unsigned int noise_tap;
+	unsigned int noise_mult;
 } poly_gen;
+
+
+// Generates a single 44.1khz 1-bit sample and increments poly_time
+// sample should be a [n channels] long array
+extern void poly_next_frame(int16_t *frame);
 
 // Generator thread main loop:
 extern void *poly_gen_kernel(void *ptr);

@@ -10,7 +10,7 @@ INCLUDE= -I ./include
 # architecture like ancient SPARC or MIPS:
 FPIC = -fPIC
 
-# Archiver fo rbuilding the static library:
+# Archiver for building the static library:
 AR=ar
 ARFLAGS=rvs
 
@@ -24,6 +24,10 @@ endif
 
 .PHONY: all
 all: libpoly.a
+
+.PHONY: shared
+shared: client.o generator.o waveform.o
+	$(CC) -shared -o libpoly.so client.o generator.o waveform.o
 
 libpoly.a: client.o generator.o waveform.o
 	$(AR) $(ARFLAGS) libpoly.a client.o generator.o waveform.o
@@ -41,7 +45,7 @@ waveform.o: src/waveform.c
 debug: libpolydebug.a
 
 libpolydebug.a: client.o.debug generator.o.debug waveform.o.debug
-	$(AR) $(ARFLAGS) client.o.debug generator.o.debug waveform.o.debug
+	$(AR) $(ARFLAGS) libpolydebug.a client.o.debug generator.o.debug waveform.o.debug
 
 client.o.debug: src/client.c
 	$(CC) -c $(DEBUG_CFLAGS) $(INCLUDE) $(FPIC) src/client.c -o client.o.debug
@@ -51,6 +55,15 @@ generator.o.debug: src/generator.c
 
 waveform.o.debug: src/waveform.c
 	$(CC) -c $(DEBUG_CFLAGS) $(INCLUDE) $(FPIC) src/waveform.c -o waveform.o.debug
+
+.PHONY: install
+install:
+	cp libpoly.a /usr/local/lib/
+	chown root /usr/local/lib/libpoly.a
+	chmod 0755 /usr/local/lib/libpoly.a
+	cp include/poly.h /usr/local/include/
+	chown root /usr/local/include/poly.h
+	chmod 0755 /usr/local/include/poly.h
 
 .PHONY: clean
 clean:
